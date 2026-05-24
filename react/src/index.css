@@ -1,0 +1,125 @@
+body{
+  
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.form_container{
+
+  width: 600px;
+  padding: 2rem;
+  margin: 50px auto;
+  border : 2px solid black;
+  border-radius: 20px;
+  z-index: 2;
+
+}
+.form_container{
+
+  width: 600px;
+  padding: 2rem;
+  margin: 50px auto;
+  border : 2px solid black;
+  border-radius: 20px;
+  z-index: 2;
+
+}
+
+.container-list{
+
+  margin: 20px auto;
+}
+
+h1,h2{
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.nav_menu{
+
+    position: fixed;
+
+    top: 10px ;
+    left:  10px;
+
+}
+
+
+.popup_form_hide{
+
+  display: none ;
+
+
+}
+
+.popup_form_show{
+
+  display: block ;
+  
+
+  position: fixed;
+  background-color: rgba(243, 243, 243, 0.932);
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  top:0;
+  left: 0;
+  
+
+
+}
+
+.popup_container{
+
+  position: relative;
+    width: 640px;
+  padding: 1rem;
+  margin: 100px auto;
+  border : 2px solid black;
+  background-color: whitesmoke;
+  border-radius: 20px;
+  z-index: 2;
+}
+
+.popup_btn{
+
+
+
+  position: fixed;
+  top: 20px;
+  left: 530px;
+
+
+  
+}
+
+.form_btn_group{
+
+  position: absolute;
+
+  top: 20px;
+  right: 40px;
+}
+
+.page_margin{
+
+  margin-top: 4rem;
+}
+.nav_title{
+  position: fixed;
+  color: black;
+  font-size: 2rem;
+  left: 45%;
+}
+
+.login_container{
+
+  width: 350px;
+ background-color: rgb(245, 245, 245);
+   margin: 6rem auto  ;
+  padding: 2rem;
+  border: 1px solid black;
+  border-radius: 5px;
+  box-shadow: 5px 5px 10px rgb(192, 189, 189);
+}

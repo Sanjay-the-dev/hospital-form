@@ -1,0 +1,288 @@
+import { useState,useEffect } from 'react';
+import {Grid,TextField,InputLabel,FormControl,FormControlLabel, RadioGroup,Radio,Select,MenuItem, Button, areEqualValues} from '@mui/material';
+import {Paper, Table,TableContainer,TableHead,TableBody,TableCell,TableRow} from '@mui/material'
+
+function Doctor_add( {sendDoctors ,   doctorFormData, setDoctorFormData,sendCreateDoctor}){
+
+
+
+/*    const [FormData,setFormData] = useState({
+        name: '' ,
+        age:'',
+        address:'',
+        number:'',
+        gender:'',
+        department:'',
+        experience:''
+   })
+ */
+   const [editId, setEditId]= useState(null)
+
+
+    const [doctors, setDoctors] = useState([]);
+
+
+
+const fetchDoctors = async ()=>{
+
+    try{
+        const res = await fetch("http://localhost:5000/");
+        const result = await res.json();
+
+        setDoctors(result.doctors)
+
+        console.log(doctors);
+
+        sendDoctors(result.doctors);
+
+
+        
+    }
+    catch(err){
+        console.log(err)
+    }
+}
+
+useEffect(()=>{fetchDoctors() },[]);
+
+useEffect(() => { sendCreateDoctor(() => createDoctor); }, []);
+
+
+const createDoctor = async ()=>{
+
+    try{
+        await fetch(`http://localhost:5000/doctor/create`,{
+            method:'POST',
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(doctorFormData)
+    
+        })
+
+
+
+        setDoctorFormData({
+        name: '' ,
+        age:'',
+        address:'',
+        number:'',
+        gender:'',
+        department:'',
+        experience:''
+        })
+
+     fetchDoctors();
+
+    }
+    catch(err){
+        console.log(err);
+
+    }
+}
+
+const deleteDoctor = async (id)=>{
+
+    try{
+        await fetch(`http://localhost:5000/doctor/d/${id}`,{
+            method:"DELETE"
+        })
+
+        fetchDoctors();
+    }
+    catch(err){
+        console.log(err)
+    }
+
+}
+
+const updateDoctor = async()=> {
+
+    try{
+
+        await fetch(`http://localhost:5000/doctor/update`,{
+            method:"PUT",
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({...doctorFormData, editId})
+        })
+
+
+    setDoctorFormData({
+        name: '' ,
+        age:'',
+        address:'',
+        number:'',
+        gender:'',
+        department:'',
+        experience:''
+    })
+    setEditId(null);
+
+     fetchDoctors();
+
+    }
+
+    catch(err){
+
+        console.log(err)
+    }
+}
+
+
+const editHandle = (doc)=>{
+
+    setDoctorFormData(doc)
+     setEditId(doc.id)
+     
+    
+}
+
+
+    return(
+        <>
+        <div className="form_container">
+
+            <h1>Doctors Entry Form</h1>
+
+            <FormControl>
+
+
+            <Grid container spacing={3} >  
+
+                <Grid item >
+                <TextField value={doctorFormData.name} label="Name" sx={{marginBottom:"20px", width:"250px"}} onChange={(e)=>{setDoctorFormData(prev=>({...prev, name:e.target.value}))}}/>
+
+                <br />
+
+                <TextField value={doctorFormData.age} label="Age" sx={{marginBottom:"20px", width:"250px"}} onChange={(e)=>{setDoctorFormData(prev=>({...prev, age:e.target.value}))}}/>
+
+                <br />
+
+                <TextField value={doctorFormData.address} label="Address" sx={{marginBottom:"20px", width:"250px"}} onChange={(e)=>{setDoctorFormData(prev=>({...prev, address:e.target.value}))}}/>
+
+                    <br />
+
+                <TextField value={doctorFormData.number} label="Number" sx={{marginBottom:"20px", width:"250px"}} onChange={(e)=>{setDoctorFormData(prev=>({...prev, number:e.target.value}))}}/>
+
+
+                </Grid>
+
+                <Grid item>
+
+                    <FormControl>
+                        <label>Gender</label> 
+                        <RadioGroup row value={doctorFormData.gender}>
+                            <FormControlLabel value='Male' label='Male' control={<Radio/>} onChange={(e)=>{setDoctorFormData(prev=>({...prev, gender:e.target.value}))}}/>
+                            <FormControlLabel value='Female' label="Female" control={<Radio/>} onChange={(e)=>setDoctorFormData(prev=>({...prev, gender:e.target.value}))}/>
+                            <FormControlLabel value='others' label="others" control={<Radio/>} onChange={(e)=>setDoctorFormData(prev=>({...prev, gender:e.target.value}))}/>
+                        </RadioGroup>
+                    </FormControl>
+                    <br />
+                    <br />
+
+                    <FormControl>
+                        <InputLabel >Department</InputLabel>
+
+                        <Select value={doctorFormData.department} label='Department' sx={{width:"260px"}} onChange={(e)=>{ setDoctorFormData(prev=>({...prev, department:e.target.value}))}}>
+                            <MenuItem value="Cardiology">Cardiology</MenuItem>
+                            <MenuItem value="Dermatology">Dermatology</MenuItem>
+                            <MenuItem value="Endocrinology">Endocrinology</MenuItem>
+                            <MenuItem value="Neurology">Neurology</MenuItem>
+                            <MenuItem value="Ophthalmology">Ophthalmology</MenuItem>
+                            <MenuItem value="Hematology">Hematology</MenuItem>
+                            <MenuItem value="Pulmonology">Pulmonology</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <br />
+
+                    <br />
+
+                    <FormControl>
+                        <InputLabel >Experience</InputLabel>
+
+                        <Select value={doctorFormData.experience} label='Experience' sx={{width:"260px"}} onChange={(e)=>setDoctorFormData(prev=>({...prev, experience:e.target.value}))}>
+                            <MenuItem value="0-1 Years">0-1 Years</MenuItem>
+                            <MenuItem value="2-3 Years">2-3 Years</MenuItem>
+                            <MenuItem value="3-5 Years">3-5 years</MenuItem>
+                            <MenuItem value="5-10 Years">5-10 Years</MenuItem>
+                            <MenuItem value="10-20 Years">10-20 Years</MenuItem>
+                            <MenuItem value="20+ Years">20+ years</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <br />
+
+                    
+                </Grid>
+
+            </Grid>
+
+
+        { editId ? 
+        <Button variant='contained' color='info' onClick={updateDoctor}>Update</Button>
+            :
+            <Button variant='contained' color='info' onClick={createDoctor}>Create</Button>
+    }
+                
+            </FormControl>
+        </div>
+
+
+        <div className="container-list">
+
+        <Paper sx={{width:"750px", margin:'20px auto'}}>
+
+        <TableContainer component={Paper}>
+        <Table >
+          <TableHead sx={{border:'2px solid black'}}>
+            <TableRow>
+              <TableCell  sx={{borderBottom:'2px solid black'}} >Name</TableCell>
+              <TableCell  sx={{borderBottom:'2px solid black'}}>age</TableCell>
+              <TableCell  sx={{borderBottom:'2px solid black'}}>Address</TableCell>
+              <TableCell  sx={{borderBottom:'2px solid black'}}>Number</TableCell>
+              <TableCell  sx={{borderBottom:'2px solid black'}}>Gender</TableCell>
+              <TableCell  sx={{borderBottom:'2px solid black', width:"100px"}}>Department</TableCell>
+              <TableCell  sx={{borderBottom:'2px solid black', width:"100px"}}>Experience</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody sx={{border:'2px solid black'}}>
+            {doctors.map((doc)=>{
+              return(
+              <TableRow key={doc.id}>
+                <TableCell>{doc.name}</TableCell>
+                <TableCell>{doc.age}</TableCell>
+                <TableCell>{doc.address}</TableCell>
+                <TableCell>{doc.number}</TableCell>
+                <TableCell>{doc.gender}</TableCell>
+                <TableCell>{doc.department}</TableCell>
+                <TableCell>{doc.experience}</TableCell>
+
+                 <TableCell><Button variant="contained" color="error" onClick={()=>{deleteDoctor(doc.id)}}>Delete</Button></TableCell>
+                <TableCell><Button variant="contained" color="info"onClick={()=>{editHandle(doc)}}>Edit</Button></TableCell>
+              </TableRow>
+
+              )
+            })}
+          </TableBody>
+        </Table>
+
+        </TableContainer>
+
+
+        </Paper>
+
+
+        </div>
+
+
+        </>
+    )
+
+
+}
+
+export default Doctor_add;
