@@ -1,11 +1,12 @@
-import { useState,useEffect } from "react";
+import { useState,useEffect, useContext } from "react";
 import { Link, useFetchers, useNavigate } from "react-router-dom";
-import {Button,Grid,InputLabel,TextField,FormControl,FormControlLabel,Menu,Radio,RadioGroup,Select,MenuItem} from '@mui/material';
+import {Button,Grid,InputLabel,TextField,Snackbar,Alert,FormControl,FormControlLabel,Menu,Radio,RadioGroup,Select,MenuItem} from '@mui/material';
 import {Table,TableContainer,TableHead,TableBody,TableRow,TableCell,Paper,TablePagination} from '@mui/material';
 import { Box, AppBar,Typography,Toolbar,Accordion,AccordionDetails,AccordionSummary} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {ReactSpreadsheetImport} from 'react-spreadsheet-import';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { authContext } from "../App";
 
 
 import jsPDF from 'jspdf' ;
@@ -23,7 +24,13 @@ function Patients(){
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
 
+    const {setNotifyLogout} = useContext(authContext);
+
     const navigate = useNavigate();
+
+    const [notifyDoctorCreate, setNotifyDoctorCreate] = useState(false);
+    const [notifyPatientCreate, setNotifyPatientCreate] = useState(false);
+    const [notifyPatientDelete, setNotifyPatientDelete] = useState(false);
     
   
   const [importUi, setImportUi]= useState(false)
@@ -137,6 +144,8 @@ const createPatient = async()=>{
 
      userFetch();
 
+     setNotifyPatientCreate(true);
+
   }
   catch(err){
     console.log(err)
@@ -154,6 +163,7 @@ const deletePatient = async(id)=>{
     })
 
     userFetch();
+    setNotifyPatientDelete (true);
   }
   catch(err)
   {
@@ -250,6 +260,7 @@ const createDoctor = async ()=>{
         })
 
      fetchDoctors();
+     setNotifyDoctorCreate(true);
 
     }
     catch(err){
@@ -399,6 +410,8 @@ const logout = async()=>{
         });
 
         navigate('/');
+
+        setNotifyLogout(true);
     }
 
     catch(err){
@@ -460,6 +473,27 @@ const fields = [
 return(
   <  >
 
+
+    <Snackbar open={notifyDoctorCreate} 
+    autoHideDuration={3000}
+    onClose={()=>setNotifyDoctorCreate(false)}
+    anchorOrigin={{vertical:"top", horizontal:"center"}}>
+        <Alert variant='filled' severity='success' sx={{width:"300px", alignItems:"center",paddingLeft:"70px", fontSize:"16px"}}>Doctor Created Successfully</Alert>
+    </Snackbar>
+
+    <Snackbar open={notifyPatientCreate} 
+    autoHideDuration={3000}
+    onClose={()=>setNotifyPatientCreate(false)}
+    anchorOrigin={{vertical:"top", horizontal:"center"}}>
+        <Alert variant='filled' severity='success' sx={{width:"300px", alignItems:"center",paddingLeft:"70px", fontSize:"16px"}}>Patient Created Successfully</Alert>
+    </Snackbar>
+
+    <Snackbar open={notifyPatientDelete} 
+    autoHideDuration={3000}
+    onClose={()=>setNotifyPatientDelete(false)}
+    anchorOrigin={{vertical:"top", horizontal:"center"}}>
+        <Alert variant='filled' severity='error' sx={{width:"300px", alignItems:"center",paddingLeft:"70px", fontSize:"16px"}}>Patient Deleted</Alert>
+    </Snackbar>
  
       <ReactSpreadsheetImport
         isOpen={importUi}

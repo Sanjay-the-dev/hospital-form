@@ -1,17 +1,19 @@
 
 import {Button, TextField,Grid, Typography,Checkbox,Alert , Snackbar} from '@mui/material'
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import {useNavigate } from 'react-router-dom';
+import {authContext} from '../App'
 
 
 
-function Login (){
+function Login ({notifyLogin}){
 
     const[loginUsername, setLoginUsername] = useState('');
     const [LoginPassword, setLoginPassword] = useState('');
     const [showPassword, setShowPassword]  = useState('');
     const [notify, setNotify] = useState(false);
 
+    const {setNotifyLogin} = useContext(authContext);
     const URL  = 'http://localhost:5000';
 
     const navigate = useNavigate();
@@ -41,11 +43,13 @@ const formSubmit = async ()=>{
 
         if(result.role == "admin"){
             navigate('/admin');
+            setNotifyLogin(true);
         }
         
 
         if(result.role == "receptionist"){
-            navigate('/receptionist')
+            navigate('/receptionist');
+            setNotifyLogin(true);
         }
 
         setLoginPassword('');

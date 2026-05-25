@@ -1,16 +1,17 @@
-import { useState,useEffect } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
+import { useState,useEffect, useContext } from 'react';
+import { Link,useNavigate, } from 'react-router-dom';
 import {Grid,TextField,InputLabel,FormControl,FormControlLabel, RadioGroup,Radio,Select,Menu,MenuItem, Button, areEqualValues, FormLabel} from '@mui/material';
 import {Paper, Table,TableContainer,TableHead,TableBody,TableCell,TableRow} from '@mui/material';
-import {  Box, AppBar,Typography,Toolbar,Accordion,AccordionSummary,AccordionDetails} from '@mui/material';
+import {  Box, AppBar,Typography,Toolbar,Accordion,AccordionSummary,AccordionDetails, Snackbar,Alert} from '@mui/material';
 import  ExpandMoreIcon from '@mui/icons-material/ExpandMore' 
 import{ ReactSpreadsheetImport}  from 'react-spreadsheet-import'
 import jsPDF from 'jspdf' ;
 import  autoTable  from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import {saveAs} from 'file-saver';
-import { m } from 'framer-motion';
+import { authContext } from '../App';
 import DeleteIcon from '@mui/icons-material/Delete';
+
 
 
 function Doctor( {sendDoctors ,doctorFormData }){
@@ -20,10 +21,17 @@ function Doctor( {sendDoctors ,doctorFormData }){
 
     const navigate = useNavigate();
 
-  const [anchorEl, setAnchorEl] = useState(null);    // export button menu expand collapse
-  const open = Boolean(anchorEl);
+    const {setNotifyLogout} = useContext(authContext);
 
-  const [importUI, setImportUi] =  useState(false) ;    //import ui popup 
+    const [anchorEl, setAnchorEl] = useState(null);    // export button menu expand collapse
+    const open = Boolean(anchorEl);
+
+    const [importUI, setImportUi] =  useState(false) ;    //import ui popup 
+
+    const [notifyDoctorCreate, setNotifyDoctorCreate] = useState(false);
+    const [notifyDoctorDelete, setNotifyDoctorDelete] = useState(false);
+    const [notifyDoctorEdit, setNotifyDoctorEdit] = useState(false);
+  
 
 
     const[exportTable, setExportTable] = useState([]);
@@ -133,6 +141,8 @@ const createDoctor = async ()=>{
 
      fetchDoctors();
 
+     setNotifyDoctorCreate(true);
+
     }
     catch(err){
         console.log(err);
@@ -149,6 +159,7 @@ const deleteDoctor = async (id)=>{
         })
 
         fetchDoctors();
+        setNotifyDoctorDelete(true)
     }
     catch(err){
         console.log(err)
@@ -361,6 +372,7 @@ const logout = async()=>{
         });
 
         navigate('/');
+        setNotifyLogout(true);
     }
 
     catch(err){
@@ -434,6 +446,20 @@ const logout = async()=>{
 
     return(
     <>
+
+    <Snackbar open={notifyDoctorCreate} 
+    autoHideDuration={3000}
+    onClose={()=>setNotifyDoctorCreate(false)}
+    anchorOrigin={{vertical:"top", horizontal:"center"}}>
+        <Alert variant='filled' severity='success' sx={{width:"300px", alignItems:"center",paddingLeft:"70px", fontSize:"16px"}}>Doctor Created Successfully</Alert>
+    </Snackbar>
+
+    <Snackbar open={notifyDoctorDelete} 
+    autoHideDuration={3000}
+    onClose={()=>setNotifyDoctorDelete(false)}
+    anchorOrigin={{vertical:"top", horizontal:"center"}}>
+        <Alert variant='filled' severity='error' sx={{width:"300px", alignItems:"center",paddingLeft:"70px", fontSize:"16px"}}>Doctor Deleted</Alert>
+    </Snackbar>
 
     <ReactSpreadsheetImport 
     isOpen={importUI}

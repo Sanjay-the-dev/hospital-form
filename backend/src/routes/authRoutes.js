@@ -24,7 +24,6 @@ router.post(`/login`,async(req,res)=>{
 
         const user = users[0];
         
-        console.log('user role', user.role);
 
         const token = jwt.sign(
             {
