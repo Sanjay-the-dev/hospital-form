@@ -6,7 +6,7 @@ import {authContext} from '../App'
 
 
 
-function Login ({notifyLogin}){
+function Login (){
 
     const[loginUsername, setLoginUsername] = useState('');
     const [LoginPassword, setLoginPassword] = useState('');
@@ -37,19 +37,18 @@ const formSubmit = async ()=>{
 
          console.log(result);
 
-        if (result.invalidMessage ){
+
+        if(result.invalidMessage){
             setNotify(true);
         }
 
         if(result.role == "admin"){
             navigate('/admin');
-            setNotifyLogin(true);
         }
         
 
         if(result.role == "receptionist"){
             navigate('/receptionist');
-            setNotifyLogin(true);
         }
 
         setLoginPassword('');

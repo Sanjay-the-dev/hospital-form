@@ -6,6 +6,7 @@ import cookieParser  from 'cookie-parser'
 import doctorRoutes from './routes/doctorRoutes.js';
 import patientRoutes from './routes/patientRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import UsersManage from './routes/userManage.js';
 
 import VerifyToken from '../middleware/VerifyToken.js'
 
@@ -33,6 +34,8 @@ app.use(authRoutes);
 app.use(patientRoutes);
 
 app.use(doctorRoutes);
+
+app.use(UsersManage);
 
 app.use(VerifyToken)
 
