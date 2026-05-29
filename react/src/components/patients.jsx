@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {ReactSpreadsheetImport} from 'react-spreadsheet-import';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { authContext } from "../App";
+import axios from 'axios'
 
 
 import jsPDF from 'jspdf' ;
@@ -33,13 +34,13 @@ function Patients(){
     const [notifyPatientDelete, setNotifyPatientDelete] = useState(false);
     
   
-  const [importUi, setImportUi]= useState(false)
+  const [importUi, setImportUi]= useState(false);
 
   const[patients,setPatients] = useState([]);
   const[patientsColumn, setPatientsColumn] = useState([])
-  const [doctors , setDoctors] = useState([]);
+  const [doctors , setDoctors] = useState();
 
-  const[exportTable, setExportTable] = useState([]);
+  const[exportTable, setExportTable] = useState();
 
   const [doctorFormData, setDoctorFormData] = useState({
     name: '',
@@ -53,7 +54,6 @@ function Patients(){
 });
 
 
-  const [createDoctorFn, setCreateDoctorFn] = useState(null);
   const [doctorPopup, setDoctorPopup ] = useState (false);
   const [patientsPopup, setPatientsPopup] = useState(false);
   
@@ -70,6 +70,10 @@ function Patients(){
   const [page,setPage] = useState(0);
   const [rowPerPage,setRowPerPage] = useState(5);
   const [totalPage, setTotalPage] = useState(0);
+  
+
+  const [isExport, setIsExport] = useState(false);
+
 
   const [search,setSearch] = useState({
     name:'',
@@ -86,37 +90,58 @@ function Patients(){
 const userFetch = async()=>{
 
   try{
-    const res = await fetch(`${URL}/patient`,{
-      method:"POST",
-      headers:{
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({search,page, rowPerPage})
-    });
-    const result = await res.json();
+    const res = await axios.post(`${URL}/patient`,{  search,page, rowPerPage,isExport  });
 
-     setPatients(result.data);
-     setTotalPage(result.total);
-     setExportTable(result.exportTable);
+    const data = res.data;
 
-     setPatientsColumn(result.patientsColumn.map((col)=>{
-      return(   
-      col.Field.charAt(0).toUpperCase().replaceAll("_"," ") 
-      +
-       col.Field.slice(1).replaceAll("_"," ") 
-      )
-    }))
+    // -------assigning data--------//
 
-/*      setDoctors(result.doctors);
- */
+
+
+      const patientcol = data.patientsColumn.map((col)=>{
+     return(   
+     col.Field.charAt(0).toUpperCase().replaceAll("_"," ") 
+     +
+      col.Field.slice(1).replaceAll("_"," ") 
+     )
+    })
+
+    
+    setPatientsColumn(patientcol);
+    setPatients(data.patients);
+    setTotalPage(data.total);
+
+    setExportTable(data.patients);
+
+
+     
+
+
+    console.log("docname", doctors)
+
+
+
+
 
   } 
   catch(err){
     console.log(err)
   }
 }
+const fetchDoctorsName = async()=>{
 
-useEffect(()=>{userFetch()},[page,rowPerPage]);
+  try {
+    const res =  await axios.get(`${URL}/doctorsname`);
+    const data =  res.data;
+    
+    setDoctors(data); 
+  } 
+  catch (error) {
+    console.log(error)  ;
+  }
+}
+
+useEffect(()=>{userFetch();},[page,rowPerPage,anchorEl]);
 
 
 
@@ -124,16 +149,9 @@ useEffect(()=>{userFetch()},[page,rowPerPage]);
 const createPatient = async()=>{
   
   try{
-    await fetch(`${URL}/patients`,{
-      method:'POST',
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify({name,age,address,number,gender,blood})
-      
-    });
+    await axios.post(`${URL}/patients`,{name,age,address,number,gender,blood});
     
-    console.log("post methond 88888")
+    console.log("post methond ")
      setName("");
      setAge("");
      setAddress("");
@@ -158,9 +176,7 @@ const createPatient = async()=>{
 const deletePatient = async(id)=>{
 
   try{
-    await fetch(`${URL}/patient/${id}`,{
-      method:"DELETE"  
-    })
+    await axios.delete(`${URL}/patient/${id}`)
 
     userFetch();
     setNotifyPatientDelete (true);
@@ -175,14 +191,7 @@ const deletePatient = async(id)=>{
 const updatePatient = async()=>{
   
     try{
-     await fetch(`${URL}/patient`,{
-      method:'PUT',
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body: JSON.stringify({name,age,address,number,gender,blood,editId})
-      
-     });
+     await axios.put(`${URL}/patient`,{name,age,address,number,gender,blood,editId});
 
      setName("");
      setAge("");
@@ -236,14 +245,7 @@ const searchPatient = ()=>{
 const createDoctor = async ()=>{
 
     try{
-        await fetch(`${URL}/doctor`,{
-            method:'POST',
-            headers:{
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(doctorFormData)
-    
-        })
+        await axios.post(`${URL}/doctor/create`,doctorFormData)
 
 
         setDoctorName(doctorFormData.name)
@@ -370,10 +372,14 @@ const exportCSV = ()=>{
 
   const handleClick = (event)=>{
     setAnchorEl(event.currentTarget);
+    setIsExport(true);
+    userFetch();
   };
 
   const handleClose = ()=>{
     setAnchorEl(null);
+    setIsExport(false)
+
   };
 
 
@@ -507,13 +513,15 @@ return(
     <AppBar position='fixed' sx={{backgroundColor:"white"}}>
 
       <Toolbar>
-      <Link to='/admin'> <Button variant="contained" color='info' sx={{marginRight:"20px"}} >Patients List</Button></Link>
+      <Link to='/admin'> <Button variant="contained" color='info' sx={{marginRight:"10px"}} >Patients List</Button></Link>
 
-      <Link to='/admin/doctor'><Button variant="contained" color='info'> Doctors List</Button></Link>
+      <Link to='/admin/doctor'><Button variant="contained" sx={{marginRight:"10px"}} color='info'> Doctors List</Button></Link>
+
+      <Link to='/admin/usersmanage'><Button variant="contained" color='info'> Users List</Button></Link>
   
     <div className="form_btn_group   page_margin">
 
-      <Button variant="contained" sx={{ position:"fixed", top:"15px", right:"325px"}}  color="warning" onClick={()=>{setPatientsPopup(true)}}> Add Patient</Button>
+      <Button variant="contained" sx={{ position:"fixed", top:"15px", right:"325px"}}  color="warning" onClick={()=>{setPatientsPopup(true); userFetch(); fetchDoctorsName();}}> Add Patient</Button>
 
       <Button variant="contained" sx={{ position:"fixed", top:"15px", right:"220px"}}  color="primary" onClick={()=>{setImportUi(true)}}>Import</Button>
 
@@ -551,7 +559,7 @@ return(
 
     <FormControl>
        
-      <Button variant="contained" color="error" sx={{width:"20px", left:"540px", top:"-70px"}} onClick={()=>{setPatientsPopup(false)}}>X</Button>
+      <Button variant="contained" color="error" sx={{width:"20px", left:"540px", top:"-70px"}} onClick={()=>{setPatientsPopup(false); }}>X</Button>
 
       <Grid  container direction="row" spacing={5} rowSpacing={1}> 
 
@@ -620,9 +628,9 @@ return(
 
             <InputLabel> Doctors</InputLabel>
             <Select value={doctorName} label ="doctors" sx={{marginBottom:"20px",marginRight:"30px", width:"180px"}} onChange={(e)=>   {setDoctorName(e.target.value)}}>
-              {doctors.map((doc)=>{
+              {!doctors ? " " : doctors.map((doc,index)=>{
                 return(
-                  <MenuItem key={doc.id} value={doc.name}>{doc.name}</MenuItem>
+                  <MenuItem key={index} value={doc}>{doc}</MenuItem>
                 )
               })}
             </Select>
@@ -758,14 +766,6 @@ return(
   </div>
 
 
-
-
- {/* doctor props  */}
-
-        <div className="popup_form_hide"> 
-
-          <Doctor_add sendDoctors={setDoctors} doctorFormData={doctorFormData}/>
-        </div>
 
 
  {/* doctor create form  */}

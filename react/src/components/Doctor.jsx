@@ -3,8 +3,10 @@ import { Link,useNavigate, } from 'react-router-dom';
 import {Grid,TextField,InputLabel,FormControl,FormControlLabel, RadioGroup,Radio,Select,Menu,MenuItem, Button, areEqualValues, FormLabel} from '@mui/material';
 import {Paper, Table,TableContainer,TableHead,TableBody,TableCell,TableRow} from '@mui/material';
 import {  Box, AppBar,Typography,Toolbar,Accordion,AccordionSummary,AccordionDetails, Snackbar,Alert} from '@mui/material';
-import  ExpandMoreIcon from '@mui/icons-material/ExpandMore' 
-import{ ReactSpreadsheetImport}  from 'react-spreadsheet-import'
+import  ExpandMoreIcon from '@mui/icons-material/ExpandMore' ;
+import{ ReactSpreadsheetImport}  from 'react-spreadsheet-import';
+import axios from 'axios';
+
 import jsPDF from 'jspdf' ;
 import  autoTable  from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -14,7 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 
 
-function Doctor( {sendDoctors ,doctorFormData }){
+function Doctor(){
 
 
     const [URL, setURL] = useState('http://localhost:5000');
@@ -33,7 +35,7 @@ function Doctor( {sendDoctors ,doctorFormData }){
     const [notifyDoctorEdit, setNotifyDoctorEdit] = useState(false);
   
 
-
+    const [isExport, setIsExport] = useState(false)
     const[exportTable, setExportTable] = useState([]);
 
    const [docFormData, setDoctorFormData] = useState({
@@ -74,32 +76,19 @@ function Doctor( {sendDoctors ,doctorFormData }){
 const fetchDoctors = async ()=>{
 
     try{
-        const res = await fetch(`${URL}/doctor`,{
-            method:"POST",
-            headers:{
-            "Content-Type":"application/json"
-            },
-            body: JSON.stringify({search})
-        });
+        const res = await axios.post(`${URL}/doctor`,{search,isExport});
 
-        const result = await res.json();
+        const data = await res.data;
 
-        setDoctors(result.doctors);
-        setDoctorColumn(result.doctorsColumn.map((col)=>{
+        setDoctors(data.doctors);
+        setDoctorColumn(data.doctorsColumn.map((col)=>{
             return(
                 col.Field.charAt(0).toUpperCase().replace("_"," ") 
                 +
                 col.Field.slice(1).replaceAll("_"," ")
             )
         }));
-        setExportTable(result.exportTable)
-
-
-        sendDoctors(result.doctors);
-
-
-
-
+        setExportTable(data.doctors)
         
     }
     catch(err){
@@ -107,25 +96,14 @@ const fetchDoctors = async ()=>{
     }
 }
 
-useEffect(()=>{
-    fetchDoctors() ;  
-
-},[ doctorFormData]);
+useEffect(()=>{fetchDoctors();},[search])
 
 
 
 const createDoctor = async ()=>{
 
     try{
-        await fetch(`${URL}/doctor/create`,{
-            method:'POST',
-            headers:{
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(docFormData)
-    
-        })
-
+        await axios.post(`${URL}/doctor/create`,docFormData);
 
 
         setDoctorFormData({
@@ -154,9 +132,7 @@ const createDoctor = async ()=>{
 const deleteDoctor = async (id)=>{
 
     try{
-        await fetch(`${URL}/doctor/${id}`,{
-            method:"DELETE"
-        })
+        await axios.delete(`${URL}/doctor/${id}`)
 
         fetchDoctors();
         setNotifyDoctorDelete(true)
@@ -171,13 +147,7 @@ const updateDoctor = async()=> {
 
     try{
 
-        await fetch(`${URL}/doctor`,{
-            method:"PUT",
-            headers:{
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({...docFormData, editId})
-        })
+        await axios.put(`${URL}/doctor`,{...docFormData, editId })
 
 
     setDoctorFormData({
@@ -472,10 +442,12 @@ const logout = async()=>{
      <AppBar position='fixed' sx={{backgroundColor:"white"}}>
 
       <Toolbar>
-      <Link to='/admin' > <Button variant="contained" color='info' sx={{marginRight:"20px"}} >Patients List</Button></Link>
+      <Link to='/admin' > <Button variant="contained" color='info' sx={{marginRight:"10px"}} >Patients List</Button></Link>
 
-      <Link to='/admin/doctor' ><Button variant="contained" color='info'> Doctors List</Button></Link>
+      <Link to='/admin/doctor' ><Button variant="contained" sx={{marginRight:"10px"}} color='info'> Doctors List</Button></Link>
       
+      <Link to='/admin/usersmanage'><Button variant="contained" color='info'> Users List</Button></Link>
+
 
     <div className="form_btn_group   ">
 
@@ -608,7 +580,7 @@ const logout = async()=>{
 
         <div className="container-list">
 
-        <Paper sx={{width:"auto", margin:'100px auto'}}>
+        <Paper sx={{width:"1100px", margin:'100px auto'}}>
 
             <h1>DOCTORS  LIST</h1>
 

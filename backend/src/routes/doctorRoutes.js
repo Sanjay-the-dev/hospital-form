@@ -11,7 +11,7 @@ router.post("/doctor", async(req,res)=>{
      try {
 
 
-        const {search} = req.body;
+        const {search,isExport} = req.body;
         
         let condition = [];
         let values = [];
@@ -45,14 +45,8 @@ router.post("/doctor", async(req,res)=>{
             values.push(`${search.experience}`);
         }
 
-        const[exportTable] = await db.query(`select * from doctors ${condition.length ? " where " + condition.join(" AND ") : ''}`,values)
-
-
 
         let query = (`select * from doctors ${condition.length ? " where " + condition.join(" AND ") : ''} `);
-
-
-
 
         const [doctors] = await db.query(query,values);
         const [doctorsCol] = await db.query(`show columns from doctors`);

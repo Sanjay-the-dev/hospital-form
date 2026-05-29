@@ -45,7 +45,9 @@ function App(){
     <Routes>
 
       <Route path='/' element={<LogoutCheck > <LoginPage/></LogoutCheck>} />
-      <Route path='/*' element={<NotFound/>} />
+      <Route path='*' element={<NotFound/>} />
+      <Route path='/receptionist/*' element={<NotFound/>} />
+
       <Route path='/admin/*' element={<ProtectedRoute role="admin"><Admin/></ProtectedRoute>} />
 
       <Route path='/receptionist' element={<ProtectedRoute role="receptionist"><Receptionist/></ProtectedRoute>}/>

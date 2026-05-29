@@ -37,7 +37,7 @@ const formSubmit = async ()=>{
 
          console.log(result);
 
-
+        setNotifyLogin(true)
         if(result.invalidMessage){
             setNotify(true);
         }

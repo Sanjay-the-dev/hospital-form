@@ -10,8 +10,7 @@ router.post('/patient',async(req,res)=>{
 
     try{
 
-        const{search,page, rowPerPage} = req.body;
-
+        const{search,page, rowPerPage,isExport} = req.body;
 
         const limit = rowPerPage;
 
@@ -46,34 +45,36 @@ router.post('/patient',async(req,res)=>{
             values.push(`${search.blood}`);
         }
 
-        const[exportTable] = await db.query(`select * from patients ${condition.length ? " where " + condition.join(" AND ") : ''}`,values)
+
 
         values.push(limit,offset);
+        let query = (`select * from patients ${condition.length ? " where " + condition.join(" AND ") : ''} ${!isExport ? "LIMIT ? OFFSET ?" : "" } `);
 
 
-        let query = (`select * from patients ${condition.length ? " where " + condition.join(" AND ") : ''} LIMIT ? OFFSET ?`);
+            const [patientsColumn] = await db.query('show columns from patients');
+            const [patients] = await db.query(query,values);
+            const [counts] = await db.query(`select  count(*) as total from patients ${condition.length ? "WHERE" + condition.join("AND"): ""}`, values.slice(0,condition.length));
+            const totalcount = counts[0].total;
 
 
+            res.json({patientsColumn:patientsColumn,patients:patients, total:totalcount})
 
-        const [patients] = await db.query(query,values);
-
-        const [doctors] = await db.query("select * from doctors");
-
-        const [counts] = await db.query(`select count(*) as total from patients ${condition.length ? "WHERE" + condition.join("AND"): ""}`, values.slice(0,condition.length));
-
-        const totalcount = counts[0].total
-
-        const [patientsColumn] = await db.query('show columns from patients');
-
-
-
-        res.json({data:patients, total: totalcount, doctors : doctors, patientsColumn: patientsColumn, exportTable: exportTable})
     }
     catch(err){
         console.log(err)
     }
 })
 
+router.get (`/doctorsname`, async (req, res)=>{
+
+    try {
+        const [data] = await db.query(`SELECT name FROM doctors`);
+        res.json(data.map((e)=>e.name))
+    } 
+    catch (error) {
+        console.log(error)    
+    }
+})  
 router.post("/patients", async (req,res)=>{
 
     try{
